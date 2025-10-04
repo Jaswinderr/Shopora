@@ -1,12 +1,20 @@
 import { serve } from "inngest/next";
-import { inngest, syncUserCreation, syncUserDeletion, syncUserUpdation } from "@/config/inngest";
 
-// Create an API that serves zero functions
-export const { GET, POST, PUT } = serve({
+export const GET = async (req, res) => {
+  res.status(200).json({ message: "Inngest GET endpoint" });
+};
+
+export const POST = async (req, res) => {
+  const { inngest, syncUserCreation, syncUserUpdation, syncUserDeletion } = await import("@/config/inngest");
+
+  const { GET, POST, PUT } = serve({
     client: inngest,
     functions: [
-        syncUserCreation,
-        syncUserUpdation,
-        syncUserDeletion,
+      syncUserCreation,
+      syncUserUpdation,
+      syncUserDeletion,
     ],
-});
+  });
+
+  return POST(req, res);
+};
