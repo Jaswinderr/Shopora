@@ -11,15 +11,24 @@ export async function GET() {
 
 // POST endpoint for Inngest events
 export async function POST(req) {
-  // Dynamically import Inngest client & functions at runtime
   const { inngest, syncUserCreation, syncUserUpdation, syncUserDeletion } = await import("@/config/inngest.js");
 
-  // Create API handlers
   const handlers = serve({
     client: inngest,
     functions: [syncUserCreation, syncUserUpdation, syncUserDeletion],
   });
 
-  // Delegate the request to Inngest POST handler
   return handlers.POST(req);
+}
+
+// PUT endpoint (needed by Inngest Cloud)
+export async function PUT(req) {
+  const { inngest, syncUserCreation, syncUserUpdation, syncUserDeletion } = await import("@/config/inngest.js");
+
+  const handlers = serve({
+    client: inngest,
+    functions: [syncUserCreation, syncUserUpdation, syncUserDeletion],
+  });
+
+  return handlers.PUT(req);
 }
