@@ -1,11 +1,14 @@
 // config/inngest.js
 import { Inngest } from "inngest";
 
-export const inngest = new Inngest({ id: "shopora-next" });
+// Export a function to get a new client at runtime
+export function getInngestClient() {
+  return new Inngest({ id: "shopora-next" });
+}
 
-// Create Inngest functions as factories
-export function syncUserCreation() {
-  return inngest.createFunction(
+// Factory for user creation
+export function syncUserCreationFactory(client) {
+  return client.createFunction(
     { id: "sync-user-from-clerk" },
     { event: "clerk/user.created" },
     async ({ event }) => {
@@ -13,21 +16,20 @@ export function syncUserCreation() {
       const { default: User } = await import("../models/user.js");
 
       const { id, first_name, last_name, email_addresses, image_url } = event.data;
-      const userData = {
+
+      await connectDB();
+      await User.create({
         _id: id,
         email: email_addresses[0].email_address,
         name: `${first_name} ${last_name}`,
         imageUrl: image_url,
-      };
-
-      await connectDB();
-      await User.create(userData);
+      });
     }
   );
 }
 
-export function syncUserUpdation() {
-  return inngest.createFunction(
+export function syncUserUpdationFactory(client) {
+  return client.createFunction(
     { id: "update-user-from-clerk" },
     { event: "clerk/user.updated" },
     async ({ event }) => {
@@ -35,21 +37,20 @@ export function syncUserUpdation() {
       const { default: User } = await import("../models/user.js");
 
       const { id, first_name, last_name, email_addresses, image_url } = event.data;
-      const userData = {
+
+      await connectDB();
+      await User.findByIdAndUpdate(id, {
         _id: id,
         email: email_addresses[0].email_address,
         name: `${first_name} ${last_name}`,
         imageUrl: image_url,
-      };
-
-      await connectDB();
-      await User.findByIdAndUpdate(id, userData);
+      });
     }
   );
 }
 
-export function syncUserDeletion() {
-  return inngest.createFunction(
+export function syncUserDeletionFactory(client) {
+  return client.createFunction(
     { id: "delete-user-with-clerk" },
     { event: "clerk/user.deleted" },
     async ({ event }) => {

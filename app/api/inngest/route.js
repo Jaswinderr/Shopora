@@ -1,4 +1,3 @@
-// app/api/inngest/route.js
 import { serve } from "inngest/next";
 
 export async function GET() {
@@ -8,42 +7,33 @@ export async function GET() {
   });
 }
 
-export async function POST(req) {
+// Helper to create handlers at runtime
+async function getHandlers() {
   const {
-    inngest,
-    syncUserCreation,
-    syncUserUpdation,
-    syncUserDeletion,
+    getInngestClient,
+    syncUserCreationFactory,
+    syncUserUpdationFactory,
+    syncUserDeletionFactory,
   } = await import("@/config/inngest.js");
 
-  const handlers = serve({
-    client: inngest,
+  const client = getInngestClient();
+
+  return serve({
+    client,
     functions: [
-      syncUserCreation(),
-      syncUserUpdation(),
-      syncUserDeletion(),
+      syncUserCreationFactory(client),
+      syncUserUpdationFactory(client),
+      syncUserDeletionFactory(client),
     ],
   });
+}
 
+export async function POST(req) {
+  const handlers = await getHandlers();
   return handlers.POST(req);
 }
 
 export async function PUT(req) {
-  const {
-    inngest,
-    syncUserCreation,
-    syncUserUpdation,
-    syncUserDeletion,
-  } = await import("@/config/inngest.js");
-
-  const handlers = serve({
-    client: inngest,
-    functions: [
-      syncUserCreation(),
-      syncUserUpdation(),
-      syncUserDeletion(),
-    ],
-  });
-
+  const handlers = await getHandlers();
   return handlers.PUT(req);
 }
