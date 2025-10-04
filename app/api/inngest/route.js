@@ -11,9 +11,9 @@ export async function GET() {
 async function getHandlers() {
   const {
     getInngestClient,
-    syncUserCreationFactory,
-    syncUserUpdationFactory,
-    syncUserDeletionFactory,
+    syncUserCreation,
+    syncUserUpdation,
+    syncUserDeletion,
   } = await import("@/config/inngest.js");
 
   const client = getInngestClient();
@@ -21,9 +21,9 @@ async function getHandlers() {
   return serve({
     client,
     functions: [
-      syncUserCreationFactory(client),
-      syncUserUpdationFactory(client),
-      syncUserDeletionFactory(client),
+      syncUserCreation(client),
+      syncUserUpdation(client),
+      syncUserDeletion(client),
     ],
   });
 }
