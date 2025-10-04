@@ -15,8 +15,8 @@ async function getHandlers() {
     { id: "sync-user-from-clerk" },
     { event: "clerk/user.created" },
     async ({ event }) => {
-      const { default: connectDB } = await import("../../config/db.js");
-      const { default: User } = await import("../../models/user.js");
+      const { default: connectDB } = await import("@/config/db.js");
+      const { default: User } = await import("@/models/user.js");
       const { id, first_name, last_name, email_addresses, image_url } = event.data;
       await connectDB();
       await User.create({
@@ -32,8 +32,8 @@ async function getHandlers() {
     { id: "update-user-from-clerk" },
     { event: "clerk/user.updated" },
     async ({ event }) => {
-      const { default: connectDB } = await import("../../config/db.js");
-      const { default: User } = await import("../../models/user.js");
+      const { default: connectDB } = await import("@/config/db.js");
+      const { default: User } = await import("@/models/user.js");
       const { id, first_name, last_name, email_addresses, image_url } = event.data;
       await connectDB();
       await User.findByIdAndUpdate(id, {
@@ -49,8 +49,8 @@ async function getHandlers() {
     { id: "delete-user-with-clerk" },
     { event: "clerk/user.deleted" },
     async ({ event }) => {
-      const { default: connectDB } = await import("../../config/db.js");
-      const { default: User } = await import("../../models/user.js");
+      const { default: connectDB } = await import("@/config/db.js");
+      const { default: User } = await import("@/models/user.js");
       const { id } = event.data;
       await connectDB();
       await User.findByIdAndDelete(id);
