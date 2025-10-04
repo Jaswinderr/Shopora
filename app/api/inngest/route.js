@@ -7,24 +7,26 @@ export async function GET() {
   });
 }
 
-// Helper to create handlers at runtime
 async function getHandlers() {
   const {
     getInngestClient,
-    syncUserCreation,
-    syncUserUpdation,
-    syncUserDeletion,
+    syncUserCreationFactory,
+    syncUserUpdationFactory,
+    syncUserDeletionFactory,
   } = await import("@/config/inngest.js");
 
   const client = getInngestClient();
 
+  // Call factories **once** to create functions
+  const functions = [
+    syncUserCreationFactory(client),
+    syncUserUpdationFactory(client),
+    syncUserDeletionFactory(client),
+  ];
+
   return serve({
     client,
-    functions: [
-      syncUserCreation(client),
-      syncUserUpdation(client),
-      syncUserDeletion(client),
-    ],
+    functions,
   });
 }
 
