@@ -1,8 +1,10 @@
 'use client'
 import { productsDummyData, userDummyData } from "@/assets/assets";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export const AppContext = createContext();
 
@@ -11,15 +13,17 @@ export const useAppContext = () => {
 }
 
 export const AppContextProvider = (props) => {
+    const [mounted, setMounted] = useState(false)
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY
     const router = useRouter()
 
     const { user } = useUser()
+    const { getToken } = useAuth()
 
     const [products, setProducts] = useState([])
     const [userData, setUserData] = useState(false)
-    const [isSeller, setIsSeller] = useState(true)
+    const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
 
     const fetchProductData = async () => {
@@ -27,7 +31,25 @@ export const AppContextProvider = (props) => {
     }
 
     const fetchUserData = async () => {
-        setUserData(userDummyData)
+        try {
+            if (user?.publicMetadata?.role === 'seller') {
+                setIsSeller(true)
+            }
+            const token = await getToken()
+            const { data } = await axios.get(`/api/user/data`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            if (data.success) {
+                setUserData(data.user)
+                setCartItems(data.user.cartItems)
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
 
     const addToCart = async (itemId) => {
@@ -77,15 +99,18 @@ export const AppContextProvider = (props) => {
     }
 
     useEffect(() => {
+        setMounted(true)
         fetchProductData()
     }, [])
 
     useEffect(() => {
-        fetchUserData()
-    }, [])
+        if (mounted && user) {
+            fetchUserData()
+        }
+    }, [user, mounted])
 
     const value = {
-        user,
+        user, getToken,
         currency, router,
         isSeller, setIsSeller,
         userData, fetchUserData,
@@ -93,6 +118,24 @@ export const AppContextProvider = (props) => {
         cartItems, setCartItems,
         addToCart, updateCartQuantity,
         getCartCount, getCartAmount
+    }
+
+    // Prevent hydration mismatch by not rendering until mounted
+    if (!mounted) {
+        return (
+            <AppContext.Provider value={{
+                user: null, getToken: () => null,
+                currency, router,
+                isSeller: false, setIsSeller: () => {},
+                userData: false, fetchUserData: () => {},
+                products: [], fetchProductData: () => {},
+                cartItems: {}, setCartItems: () => {},
+                addToCart: () => {}, updateCartQuantity: () => {},
+                getCartCount: () => 0, getCartAmount: () => 0
+            }}>
+                {props.children}
+            </AppContext.Provider>
+        )
     }
 
     return (
