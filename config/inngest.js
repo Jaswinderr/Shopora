@@ -3,7 +3,7 @@ import connectDB from "./db";
 import User from "@/models/user";
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "shopora" });
+export const inngest = new Inngest({ id: "shopora-next" });
 
 // Inngest function to save user data to a database
 export const syncUserCreation = inngest.createFunction(
