@@ -1,9 +1,9 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import connectDB from "@/config/db"
-import Order from "@/models/Order"
-import Product from "@/models/Product"
-import Address from "@/models/Address"
+import connectDB from "@/config/db.js"
+import Order from "@/models/Order.js"
+import Product from "@/models/Product.js"
+import Address from "@/models/Address.js"
 
 export async function GET(request) {
     try {

@@ -1,7 +1,7 @@
 import { Inngest } from "inngest";
 import connectDB from "./db";
-import Order from "@/models/Order";
-import User from "@/models/User";
+import Order from "@/models/Order.js";
+import User from "@/models/User.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "shopora-next" });
