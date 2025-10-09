@@ -22,7 +22,7 @@ const OrderSummary = () => {
           'Authorization': `Bearer ${token}`
         }
       })
-      
+
       if (response.data.success) {
         setUserAddresses(response.data.addresses)
         if (response.data.addresses.length > 0) {
@@ -46,7 +46,35 @@ const OrderSummary = () => {
   };
 
   const createOrder = async () => {
+    try {
+      if (!selectedAddress) {
+        toast.error("Please select an address")
+        return
+      }
+      let cartItemsArray = Object.keys(cartItems).map((key) => ({ product: key, quantity: cartItems[key] }))
+      cartItemsArray = cartItemsArray.filter((item) => item.quantity > 0)
 
+      if (cartItemsArray.length === 0) {
+        return toast.error("Please add items to the cart")
+      }
+
+      const token = await getToken()
+      const { data } = await axios.post(`/api/order/create`, { address: selectedAddress._id, items: cartItemsArray }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (data.success) {
+        toast.success(data.message)
+        setCartItems({})
+        router.push("/order-placed")
+      } else {
+        toast.error(data.message || "Failed to create order")
+      }
+
+    } catch (error) {
+      toast.error(error.message || "Failed to create order")
+    }
   }
 
   useEffect(() => {
@@ -85,11 +113,11 @@ const OrderSummary = () => {
               disabled={isLoadingAddresses}
             >
               <span>
-                {isLoadingAddresses 
-                  ? "Loading addresses..." 
+                {isLoadingAddresses
+                  ? "Loading addresses..."
                   : selectedAddress
                     ? `${selectedAddress.fullName}, ${selectedAddress.area}, ${selectedAddress.city}, ${selectedAddress.state}`
-                    : userAddresses.length === 0 
+                    : userAddresses.length === 0
                       ? "No addresses found"
                       : "Select Address"}
               </span>
