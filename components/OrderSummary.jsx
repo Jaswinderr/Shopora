@@ -12,6 +12,7 @@ const OrderSummary = () => {
 
   const [userAddresses, setUserAddresses] = useState([]);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const fetchUserAddresses = async () => {
     setIsLoadingAddresses(true);
@@ -58,6 +59,7 @@ const OrderSummary = () => {
         return toast.error("Please add items to the cart")
       }
 
+      setIsPlacingOrder(true);
       const token = await getToken()
       const { data } = await axios.post(`/api/order/create`, { address: selectedAddress._id, items: cartItemsArray }, {
         headers: {
@@ -74,6 +76,8 @@ const OrderSummary = () => {
 
     } catch (error) {
       toast.error(error.message || "Failed to create order")
+    } finally {
+      setIsPlacingOrder(false);
     }
   }
 
@@ -194,8 +198,23 @@ const OrderSummary = () => {
         </div>
       </div>
 
-      <button onClick={createOrder} className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700">
-        Place Order
+      <button 
+        onClick={createOrder} 
+        disabled={isPlacingOrder}
+        className={`w-full py-3 mt-5 transition flex items-center justify-center gap-2 ${
+          isPlacingOrder 
+            ? 'bg-gray-400 cursor-not-allowed' 
+            : 'bg-orange-600 hover:bg-orange-700'
+        } text-white`}
+      >
+        {isPlacingOrder ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+            Placing Order...
+          </>
+        ) : (
+          'Place Order'
+        )}
       </button>
     </div>
   );
