@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import connectDB from "@/config/db.js"
 import Product from "@/models/Product.js"
 import { inngest } from "@/config/inngest.js"
-import User from "@/models/user"
+import User from "@/models/user.js"
 
 export async function POST(request) {
     try {

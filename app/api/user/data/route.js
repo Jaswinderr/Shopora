@@ -1,7 +1,7 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import connectDB from "@/config/db.js"
-import User from "@/models/user"
+import User from "@/models/user.js"
 
 export async function GET(request) {
     try {
